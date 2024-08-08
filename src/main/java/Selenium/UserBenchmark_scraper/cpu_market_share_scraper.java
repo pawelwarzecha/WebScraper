@@ -1,4 +1,4 @@
-package Selenium.UserBenchmark;
+package Selenium.UserBenchmark_scraper;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-public class UserBenchmarkCPUMarketShare {
+public class cpu_market_share_scraper {
     public static void main(String[] args) throws InterruptedException, IOException {
 
         // Add options to use Chrome for automated testing

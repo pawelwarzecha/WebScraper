@@ -1,4 +1,4 @@
-package Selenium.Otodom;
+package Selenium.Otodom_scraper;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -16,7 +16,8 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Properties;
 
-public class Otodom {
+public class main_scraper extends RoomSelection {
+
     public static void main(String[] args) throws IOException, InterruptedException {
 
         //Path to Chromedriver, headless mode and path to Chrome for testing
@@ -32,9 +33,10 @@ public class Otodom {
 
         //Get data for filters from the data.properties file
         Properties prop = new Properties();
-        FileInputStream fis = new FileInputStream(System.getProperty("user.dir") + "//src//main//java//Selenium//Otodom//resources//data.properties");
+        FileInputStream fis = new FileInputStream(System.getProperty("user.dir") + "//src//main//java//Selenium//Otodom_scraper//resources//data.properties");
         prop.load(fis);
 
+        String propertyType = prop.getProperty("propType");
         String propertyLocation = prop.getProperty("propLocation");
         String minimumPrice = prop.getProperty("minPrice");
         String maximumPrice = prop.getProperty("maxPrice");
@@ -56,6 +58,7 @@ public class Otodom {
         driver.findElement(By.id("onetrust-accept-btn-handler")).click();
 
         //apply filters
+        PropertyType.selectType(driver, propertyType);
         WebElement element = driver.findElement(By.cssSelector("div[class='ey2nap44 css-1n1retz']"));
         Thread.sleep(3000);
         a.moveToElement(element).click().sendKeys(propertyLocation).build().perform();
@@ -76,29 +79,9 @@ public class Otodom {
         driver.findElement(By.id("buildYearMin")).sendKeys(buildYearMin);
         driver.findElement(By.id("buildYearMax")).sendKeys(buildYearMax);
 
-        //select the number of rooms, 0 or any other number to not apply this filter
-        switch (numberOfRooms) {
-            case "1":
-                driver.findElement(By.xpath("//div[@id='roomsNumber']//div[1]")).click();
-                break;
-            case "2":
-                driver.findElement(By.xpath("//div[@class='css-1m6zk3n eh39zul0']//div[2]")).click();
-                break;
-            case "3":
-                driver.findElement(By.xpath("//div[@class='css-1m6zk3n eh39zul0']//div[3]")).click();
-                break;
-            case "4":
-                driver.findElement(By.xpath("//div[@class='css-1ynh8jm ejrlokm4']//div[4]")).click();
-                break;
-            case "5":
-                driver.findElement(By.xpath("//div[@class='css-1m6zk3n eh39zul0']//div[5]")).click();
-                break;
-            case "6":
-                driver.findElement(By.xpath("//div[@class='css-1m6zk3n eh39zul0']//div[6]")).click();
-                break;
-            default:
-                break;
-        }
+        //uses the RoomSelection class to apply filter for the number of rooms
+        RoomSelection.selectRooms(driver, numberOfRooms);
+
         Thread.sleep(2000);
         driver.findElement(By.id("search-form-submit")).click();
         Thread.sleep(2000);
