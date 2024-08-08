@@ -19,6 +19,7 @@ import java.util.Properties;
 public class Otodom {
     public static void main(String[] args) throws IOException, InterruptedException {
 
+        //Path to Chromedriver, headless mode and path to Chrome for testing
         System.setProperty("webdriver.chrome.driver", "C:\\Chrome Driver\\chromedriver-win64\\chromedriver.exe");
         ChromeOptions co = new ChromeOptions();
         co.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
@@ -29,6 +30,7 @@ public class Otodom {
         WebDriver driver = new ChromeDriver(co);
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
+        //Get data for filters from the data.properties file
         Properties prop = new Properties();
         FileInputStream fis = new FileInputStream(System.getProperty("user.dir") + "//src//main//java//Selenium//Otodom//resources//data.properties");
         prop.load(fis);
@@ -44,13 +46,16 @@ public class Otodom {
         String pricePerMetreMax = prop.getProperty("pricePerMax");
         String numberOfRooms = prop.getProperty("rooms");
 
+        //enter the website
         driver.get("https://www.otodom.pl/");
 
         Actions a = new Actions(driver);
 
+        //accept cookies
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("onetrust-accept-btn-handler")));
         driver.findElement(By.id("onetrust-accept-btn-handler")).click();
 
+        //apply filters
         WebElement element = driver.findElement(By.cssSelector("div[class='ey2nap44 css-1n1retz']"));
         Thread.sleep(3000);
         a.moveToElement(element).click().sendKeys(propertyLocation).build().perform();
@@ -65,10 +70,13 @@ public class Otodom {
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("span[class='css-1c1kq07 epuxlk90']")));
         driver.findElement(By.cssSelector("span[class='css-1c1kq07 epuxlk90']")).click();
 
+        //apply additional filters, can only be done after the initial search
         driver.findElement(By.id("pricePerMeterMin")).sendKeys(pricePerMetreMin);
         driver.findElement(By.id("pricePerMeterMax")).sendKeys(pricePerMetreMax);
         driver.findElement(By.id("buildYearMin")).sendKeys(buildYearMin);
         driver.findElement(By.id("buildYearMax")).sendKeys(buildYearMax);
+
+        //select the number of rooms, 0 or any other number to not apply this filter
         switch (numberOfRooms) {
             case "1":
                 driver.findElement(By.xpath("//div[@id='roomsNumber']//div[1]")).click();
@@ -95,6 +103,7 @@ public class Otodom {
         driver.findElement(By.id("search-form-submit")).click();
         Thread.sleep(2000);
 
+        //initialize html and create excel workbook
         StringBuilder htmlReport= new StringBuilder();
         htmlReport.append("<html><head><title>Real Estate Data</title></head><body>");
         htmlReport.append("<h1>Real Estate Listings</h1>");
@@ -114,6 +123,7 @@ public class Otodom {
 
         int rowNum = 1;
 
+        //loop through the listing and collect the data
         while (true) {
             List<WebElement> listings = driver.findElements(By.cssSelector("article[data-cy='listing-item']"));
 
@@ -128,6 +138,7 @@ public class Otodom {
                 row.createCell(1).setCellValue(location);
                 htmlReport.append("<td>").append(location).append("</td>");
 
+                //the data is extracted from one web element and is cut into parts so that each value gets its own column
                 String info = listing.findElement(By.cssSelector("dl[class='css-12dsp7a e1clni9t1']")).getText().trim();
                 String[] infoParts = info.split("\n");
 
@@ -158,6 +169,7 @@ public class Otodom {
                 htmlReport.append("<td>").append(pricePerSqm).append("</td>");
                 htmlReport.append("<td>").append(floorNumber).append("</td>");
 
+                //images for html report only
                 try {
                     WebElement imgElement = listing.findElement(By.cssSelector("img[data-cy='listing-item-image-source']"));
                     String imgUrl = imgElement.getAttribute("src");
@@ -166,6 +178,7 @@ public class Otodom {
                     htmlReport.append("<td>No Image</td>");
                 }
 
+                //link to the listing
                 WebElement linkElement = listing.findElement(By.cssSelector("a[data-cy='listing-item-link']"));
                 String link = linkElement.getAttribute("href");
                 row.createCell(6).setCellValue(link);
